@@ -173,17 +173,14 @@ class JourneyRef(object):
 	def as_xml(self):
 		return "<JHandle tNr='%s' puic='%s' cycle='%s'/>" % (escape(self.tnr), escape(self.puic), escape(self.cycle))
 
-	def get_service(self, date=None):
-		if not date:
-			date = datetime.date.today()
-
+	def get_service(self):
 		request_body = """<?xml version='1.0' encoding='iso-8859-1'?>
 			<ReqC ver='1.1' prod='JP' lang='en' clientVersion='3.2'>
-				<JourneyReq date='%s' deliverPolyline='1' externalId='8400058#80' type='DEP' time='00:00:00'>
+				<JourneyReq>
 					%s
 				</JourneyReq>
 			</ReqC>
-		""" % (date.strftime('%Y%m%d'), self.as_xml())
+		""" % self.as_xml()
 		root = send_xml_request(request_body)
 		#print etree.tostring(root.getroot())
 		timetable = Timetable.from_xml(root.getroot())
