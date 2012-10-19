@@ -215,13 +215,13 @@ class Station(object):
 		self.lat = lat
 
 	def get_timetable(self, board_type, transport_type=TYPE_TRAINS, time=None, start_date=None, end_date=None):
-		if not time:
+		if time is None:
 			time = datetime.datetime.now().time()
 
-		if not start_date:
+		if start_date is None:
 			start_date = datetime.date.today()
 
-		if not end_date:
+		if end_date is None:
 			end_date = datetime.date.today()
 
 		request_body = """<?xml version='1.0' encoding='iso-8859-1'?>
@@ -442,7 +442,7 @@ class Connection(object):
 		earlier_connection_count=0, later_connection_count=3,
 		transport_type=TYPE_ALL, direct=False, bike=False):
 
-		if not time:
+		if time is None:
 			time = datetime.datetime.now()
 
 		request_body = """<?xml version='1.0' encoding='iso-8859-1'?>
