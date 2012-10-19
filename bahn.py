@@ -17,14 +17,25 @@ TYPE_ALL = 0x1ff
 TYPE_TRAINS = TYPE_ICE | TYPE_IC_EC | TYPE_IR | TYPE_REGIONAL | TYPE_URBAN
 
 
+class ConnectionError(IOError):
+	def __init__(self, reason):
+		self.reason = reason
+
+	def __str__(self):
+		return "ConnectionError - %s" % self.reason
+
+
 def send_xml_request(body):
-	request = urllib2.Request(
-		'http://reiseauskunft.bahn.de/bin/mgate.exe',
-		body,
-		{'Accept': 'text/xml'}
-	)
-	response = urllib2.urlopen(request)
-	return etree.parse(response)
+	try:
+		request = urllib2.Request(
+			'http://reiseauskunft.bahn.de/bin/mgate.exe',
+			body,
+			{'Accept': 'text/xml'}
+		)
+		response = urllib2.urlopen(request, timeout=20)
+		return etree.parse(response)
+	except urllib2.URLError as e:
+		raise ConnectionError(e)
 
 
 def transport_type_as_string(transport_type):
@@ -165,13 +176,13 @@ class Journey(object):
 
 
 class JourneyRef(object):
-	def __init__(self, cycle, puic, tnr):
-		self.cycle = cycle
-		self.puic = puic
-		self.tnr = tnr
+	def __init__(self, tnr, puic, cycle):
+		self.tnr = int(tnr)
+		self.puic = int(puic)
+		self.cycle = int(cycle)
 
 	def as_xml(self):
-		return "<JHandle tNr='%s' puic='%s' cycle='%s'/>" % (escape(self.tnr), escape(self.puic), escape(self.cycle))
+		return "<JHandle tNr='%s' puic='%s' cycle='%s'/>" % (self.tnr, self.puic, self.cycle)
 
 	def get_service(self):
 		request_body = """<?xml version='1.0' encoding='iso-8859-1'?>
@@ -190,9 +201,9 @@ class JourneyRef(object):
 	@staticmethod
 	def from_xml(jhandle_xml):
 		return JourneyRef(
-			cycle=jhandle_xml.get('cycle'),
+			tnr=jhandle_xml.get('tNr'),
 			puic=jhandle_xml.get('puic'),
-			tnr=jhandle_xml.get('tNr')
+			cycle=jhandle_xml.get('cycle')
 		)
 
 
