@@ -335,7 +335,7 @@ class Timetable(object):
 	def __init__(self, start_date, end_date):
 		self.start_date = start_date
 		self.end_date = end_date
-		print start_date, end_date
+		# print start_date, end_date
 
 	@staticmethod
 	def from_xml(response_xml):
